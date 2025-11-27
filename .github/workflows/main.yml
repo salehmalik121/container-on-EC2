@@ -1,0 +1,16 @@
+name: "EC2 Server Update"
+on:
+  push:
+    branches: "main"
+jobs: 
+  buildImage:
+    name: "Building Container Image of Server"
+    runs-on: ubuntu-leatest
+    steps:
+      - name: "checkout to code"
+        uses: actions/checkout@main
+      - name: "building image"
+        run: |
+          ls 
+          docker build -t learning/minimal-node-server .
+          docker images
