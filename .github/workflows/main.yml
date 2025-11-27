@@ -5,7 +5,7 @@ on:
 jobs: 
   buildImage:
     name: "Building Container Image of Server"
-    runs-on: ubuntu-leatest
+    runs-on: ubuntu-latest
     steps:
       - name: "checkout to code"
         uses: actions/checkout@main
