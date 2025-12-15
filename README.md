@@ -179,6 +179,6 @@ jobs:
 
 ## Author
 
-Saleh Muhammad – Intermediate DevOps Engineer | Cloud & CI/CD Enthusiast
+Saleh Muhammad 
 
-* [LinkedIn](https://github.com/salehmalik121)
+[LinkedIn](https://linkedin.com/in/saleh-muhammad)
