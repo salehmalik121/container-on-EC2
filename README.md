@@ -181,4 +181,4 @@ jobs:
 
 Saleh Muhammad 
 
-[LinkedIn](https://linkedin.com/in/saleh-muhammad)
+[LinkedIn](https://www.linkedin.com/in/saleh-muhammad-b08a181b1/)
