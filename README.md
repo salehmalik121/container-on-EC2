@@ -1,4 +1,4 @@
-# Automated EC2 Deployment with Docker and AWS ECR
+# Automated EC2 Depoloyment with Docker and AWS ECR
 
 ## Project Overview
 
@@ -36,11 +36,11 @@ It also serves as a learning resource for anyone wanting to understand **contain
 ```
 .
 ├── .github/workflows/
-│   └── deploy.yml        # GitHub Actions workflow for CI/CD
-├── Dockerfile            # Defines container environment for Node.js server
-├── app/                  # Node.js application code
+│   └── deploy.yml        
+├── Dockerfile            
+├── app/                  
 │   └── index.js
-├── README.md             # This file
+├── README.md             
 ```
 
 ---
