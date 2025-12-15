@@ -46,11 +46,5 @@ jobs:
             "if docker ps | grep -q minimal-node-server; then echo minimal node server running; docker kill $(docker ps -q -f name=minimal-server-container); fi",
             "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 007572786776.dkr.ecr.us-east-1.amazonaws.com",
             "docker pull 007572786776.dkr.ecr.us-east-1.amazonaws.com/learning/minimal-node-server:latest",
-            "docker run -d -p 80:3001 007572786776.dkr.ecr.us-east-1.amazonaws.com/learning/minimal-node-server:latest"
+            "docker run -d -p 80:3001 --name minimal-server-container 007572786776.dkr.ecr.us-east-1.amazonaws.com/learning/minimal-node-server:latest"
           ]'
-
-        
-          
-          
-          
-          
