@@ -37,6 +37,16 @@ jobs:
             sudo dpkg -i session-manager-plugin.deb
             aws ssm start-session --target "i-016e18ffc42a90e46"
           fi
+          aws ssm send-command \
+          --document-name "AWS-RunShellScript" \
+          --targets "Key=InstanceIds,Values=i-016e18ffc42a90e46" \
+          --comment "Deploy minimal-node-server" \
+          --parameters 'commands=[
+            "if docker ps | grep -q minimal-node-server; then echo minimal node server running; docker kill $(docker ps -q -f name=minimal-server-container); fi",
+            "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 007572786776.dkr.ecr.us-east-1.amazonaws.com",
+            "docker pull 007572786776.dkr.ecr.us-east-1.amazonaws.com/learning/minimal-node-server:latest",
+            "docker run -d -p 80:3001 007572786776.dkr.ecr.us-east-1.amazonaws.com/learning/minimal-node-server:latest"
+          ]'
 
         
           
