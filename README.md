@@ -1,4 +1,4 @@
-# Automated EC2 Deployment with Docker and AWS ECR
+# Automated EC2 Deployment with Docker and AWS ECR 
 
 ## Project Overview
 
