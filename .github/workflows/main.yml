@@ -81,15 +81,15 @@ jobs:
             --target-group-arn $GREEN_TARGET_GROUP_ARN \
             --query 'TargetHealthDescriptions[*].TargetHealth.State' \
             --output text)
-            if $(HEALTH_STATUS) -eq "healthy"; then
-              echo "Service is Healthty"
+            if [ "$HEALTH_STATUS" = "healthy" ]; then
+              echo "Service is Healthy"
               break;
             fi
 
             echo "Service is unhealthy Retry in 30s"
             sleep 30
 
-            if i -eq 3; then
+            if [ "$i" = 3 ]; then
               echo "Aborting New Build, Fix Issue"
               exit 1
             fi
@@ -120,10 +120,6 @@ jobs:
           --output text)
 
           aws elbv2 modify-listener \
-          --listener-arn $LISTENER_ARN \
-          --default-actions Type=forward,ForwardConfig='{
-          "TargetGroups": [
-          {"TargetGroupArn": "$BLUE_TARGET_GROUP_ARN", "Weight": 0},
-          {"TargetGroupArn": "$GREEN_TARGET_GROUP_ARN", "Weight": 100}
-          ]
-          }'
+          --listener-arn "$LISTENER_ARN" \
+          --default-actions "Type=forward,ForwardConfig={\"TargetGroups\":[{\"TargetGroupArn\":\"$BLUE_TARGET_GROUP_ARN\",\"Weight\":0},{\"TargetGroupArn\":\"$GREEN_TARGET_GROUP_ARN\",\"Weight\":100}]}"
+
