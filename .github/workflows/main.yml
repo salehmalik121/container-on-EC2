@@ -78,7 +78,7 @@ jobs:
 
           for i in {1..3}; do 
             HEALTH_STATUS=$(aws elbv2 describe-target-health \
-            --target-group-arn arn:aws:elasticloadbalancing:us-east-1:007572786776:targetgroup/minimal-server-2-tg/eac65cf271af7142 \
+            --target-group-arn $GREEN_TARGET_GROUP_ARN \
             --query 'TargetHealthDescriptions[*].TargetHealth.State' \
             --output text)
             if $(HEALTH_STATUS) -eq "healthy"; then
