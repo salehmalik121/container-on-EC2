@@ -39,13 +39,91 @@ jobs:
             sudo dpkg -i session-manager-plugin.deb
             aws ssm start-session --target "$EC2_INSTANCE_ID"
           fi
+
+          Green_INSTANCE_ID=$(aws ec2 describe-instances \
+          --filters "Name=tag:current_status,Values=Green" \
+          --query "Reservations[*].Instances[*].InstanceId" \
+          --output text)
+          
           aws ssm send-command \
           --document-name "AWS-RunShellScript" \
-          --targets "Key=InstanceIds,Values=$EC2_INSTANCE_ID" \
+          --targets "Key=InstanceIds,Values=$Green_INSTANCE_ID" \
           --comment "Deploy minimal-node-server" \
           --parameters 'commands=[
             "if docker ps | grep -q minimal-node-server; then echo minimal node server running; docker rm $(docker kill $(docker ps -q -f name=minimal-server-container)); fi",
             "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 007572786776.dkr.ecr.us-east-1.amazonaws.com",
             "docker pull 007572786776.dkr.ecr.us-east-1.amazonaws.com/learning/minimal-node-server:latest",
-            "docker run -d -p 80:3001 --name minimal-server-container 007572786776.dkr.ecr.us-east-1.amazonaws.com/learning/minimal-node-server:latest"
+            "docker run -d -p 80:3001 --name minimal-server-container 007572786776.dkr.ecr.us-east-1.amazonaws.com/learning/minimal-node-server:latest",
           ]'
+      - name: "Checking the health of target group & Shifting Traffic to Green Server "
+        env: 
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+          AWS_REGION: "us-east-1"
+        run: |
+          echo "Waiting for 1 minutes to check the health status of target group ..."
+          sleep 60
+          GREEN_INSTANCE_NAME=$(aws ec2 describe-instances \
+          --filters "Name=tag:current_status,Values=Green" \
+          --query "Reservations[].Instances[].Tags[?Key=='Name'].Value[]" \
+          --output text)
+          echo "Green Instance Name is : $GREEN_INSTANCE_NAME"
+
+          GREEN_TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups \
+          --name ${GREEN_INSTANCE_NAME}-tg \
+          --query "TargetGroups[*].TargetGroupArn" \
+          --output text)
+
+
+          for i in {1..3}; do 
+            HEALTH_STATUS=$(aws elbv2 describe-target-health \
+            --target-group-arn arn:aws:elasticloadbalancing:us-east-1:007572786776:targetgroup/minimal-server-2-tg/eac65cf271af7142 \
+            --query 'TargetHealthDescriptions[*].TargetHealth.State' \
+            --output text)
+            if $(HEALTH_STATUS) -eq "healthy"; then
+              echo "Service is Healthty"
+              break;
+            fi
+
+            echo "Service is unhealthy Retry in 30s"
+            sleep 30
+
+            if i -eq 3; then
+              echo "Aborting New Build, Fix Issue"
+              exit 1
+            fi
+          done 
+          
+          echo "Shifting Traffic to Green Server ..."
+          
+          LB_ARN=$(aws elbv2 describe-load-balancers \
+          --names minimal-server-alb \
+          --query "LoadBalancers[*].LoadBalancerArn" \
+          --output text)
+
+          LISTENER_ARN=$(aws elbv2 describe-listeners \
+          --load-balancer-arn $LB_ARN \
+          --query "Listeners[*].ListenerArn" \
+          --output text)
+
+
+          BLUE_INSTANCE_NAME=$(aws ec2 describe-instances \
+          --filters "Name=tag:current_status,Values=Blue" \
+          --query "Reservations[].Instances[].Tags[?Key=='Name'].Value[]" \
+          --output text)
+          echo "Blue Instance Name is : $BLUE_INSTANCE_NAME"
+
+          BLUE_TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups \
+          --name ${BLUE_INSTANCE_NAME}-tg \
+          --query "TargetGroups[*].TargetGroupArn" \
+          --output text)
+
+          aws elbv2 modify-listener \
+          --listener-arn $LISTENER_ARN \
+          --default-actions Type=forward,ForwardConfig='{
+          "TargetGroups": [
+          {"TargetGroupArn": "$BLUE_TARGET_GROUP_ARN", "Weight": 0},
+          {"TargetGroupArn": "$GREEN_TARGET_GROUP_ARN", "Weight": 100}
+          ]
+          }'

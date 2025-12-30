@@ -1,1 +1,14 @@
 /node_modules/
+.tfstate
+.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+crash.log
+*.tfvars
+*.pem
+*.log
+*.backup
+*.swp
+.DS_Store
+.vscode/
+.idea/  

@@ -12,7 +12,7 @@ app.get("/status", (req, res, next) => {
 })
 
 app.get("/helloWorld" , (req,res,next)=>{
-  res.status(200).json({"message" : "this is next version fully deployed using CI/CD on EC2 using ecr and docker installed on EC2 : v3 of code"})
+  res.status(200).json({"message" : "this is next version fully deployed using CI/CD on EC2 using ecr and docker installed on EC2 : v4 of code"})
 }
 )
 
