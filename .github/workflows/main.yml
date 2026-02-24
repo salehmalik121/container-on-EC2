@@ -122,3 +122,25 @@ jobs:
           aws elbv2 modify-listener \
           --listener-arn "$LISTENER_ARN" \
           --default-actions "[{\"Type\":\"forward\",\"ForwardConfig\":{\"TargetGroups\":[{\"TargetGroupArn\":\"$BLUE_TARGET_GROUP_ARN\",\"Weight\":0},{\"TargetGroupArn\":\"$GREEN_TARGET_GROUP_ARN\",\"Weight\":100}]}}]"
+          echo "Traffic Shifted to Green Server Successfully"
+
+          GREEN_INSTANCE_ID=$(aws ec2 describe-instances \
+          --filters "Name=tag:current_status,Values=Green" \
+          --query "Reservations[*].Instances[*].InstanceId" \
+          --output text)
+
+          BLUE_INSTANCE_ID=$(aws ec2 describe-instances \
+          --filters "Name=tag:current_status,Values=Blue" \
+          --query "Reservations[*].Instances[*].InstanceId" \
+          --output text)
+
+          aws ec2 create-tags \
+          --resources $GREEN_INSTANCE_ID \
+          --tags Key=current_status,Value=Blue
+
+          aws ec2 create-tags \
+          --resources $BLUE_INSTANCE_ID \
+          --tags Key=current_status,Value=Green
+          echo "Tags Updated Successfully"
+
+

@@ -47,6 +47,9 @@ resource "aws_alb_target_group" "minimal-server-1-tg" {
     unhealthy_threshold = 2
     matcher             = "200-399"
   }
+  tags = {
+    current_status : "Blue"
+  }
 
 }
 
@@ -69,6 +72,10 @@ resource "aws_alb_target_group" "minimal-server-2-tg" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     matcher             = "200-399"
+  }
+
+  tags = {
+    current_status : "Green"
   }
 
 }
