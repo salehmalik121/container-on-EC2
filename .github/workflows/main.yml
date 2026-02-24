@@ -1,7 +1,7 @@
 name: "EC2 Server Update"
 on:
   push:
-    branches: "main"
+    branches: "Terrform-AND-BlueGreen-Deploy"
 jobs: 
   buildImage:
     name: "Building Container Image of Server"
