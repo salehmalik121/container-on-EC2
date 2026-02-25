@@ -70,9 +70,10 @@ jobs:
           --output text)
           echo "Green Instance Name is : $GREEN_INSTANCE_NAME"
 
-          GREEN_TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups \
-          --name ${GREEN_INSTANCE_NAME}-tg \
-          --query "TargetGroups[*].TargetGroupArn" \
+          GREEN_TARGET_GROUP_ARN=$(aws resourcegroupstaggingapi get-resources \
+          --tag-filters Key=current_status,Values=Green \
+          --resource-type-filters elasticloadbalancing:targetgroup \
+          --query 'ResourceTagMappingList[].ResourceARN' \
           --output text)
 
 
@@ -114,9 +115,10 @@ jobs:
           --output text)
           echo "Blue Instance Name is : $BLUE_INSTANCE_NAME"
 
-          BLUE_TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups \
-          --name ${BLUE_INSTANCE_NAME}-tg \
-          --query "TargetGroups[*].TargetGroupArn" \
+          BLUE_TARGET_GROUP_ARN=$(aws resourcegroupstaggingapi get-resources \
+          --tag-filters Key=current_status,Values=Blue \
+          --resource-type-filters elasticloadbalancing:targetgroup \
+          --query 'ResourceTagMappingList[].ResourceARN' \
           --output text)
 
           aws elbv2 modify-listener \
@@ -141,6 +143,16 @@ jobs:
           aws ec2 create-tags \
           --resources $BLUE_INSTANCE_ID \
           --tags Key=current_status,Value=Green
+
+          aws elbv2 add-tags \
+          --resource-arns $GREEN_TARGET_GROUP_ARN \
+          --tags Key=current_status,Value=Blue
+
+          aws elbv2 add-tags \
+          --resource-arns $BLUE_TARGET_GROUP_ARN \
+          --tags Key=current_status,Value=Green
+
           echo "Tags Updated Successfully"
+         
 
 
