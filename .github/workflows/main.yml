@@ -1,7 +1,8 @@
 name: "EC2 Server Update"
 on:
   push:
-    branches: "Terrform-AND-BlueGreen-Deploy"
+    branches:
+      - "Terrform-AND-BlueGreen-Deploy"
 jobs: 
   buildImage:
     name: "Building Container Image of Server"
@@ -161,8 +162,8 @@ jobs:
           aws elbv2 add-tags \
           --resource-arns $BLUE_TARGET_GROUP_ARN \
           --tags Key=current_status,Value=Green
-
-	        echo "Tags Updated Successfully"
+          
+          echo "Tags Updated Successfully"
          
 
 
